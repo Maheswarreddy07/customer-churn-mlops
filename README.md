@@ -21,81 +21,42 @@ Project structure
 customer-churn-mlops/
 │
 ├── .github/
-│   Continuous integration setup
-│   │
 │   └── workflows/
-│       │
-│       └── test_pipeline.yml
-│           CI script — runs tests automatically on every push
+│       └── test_pipeline.yaml       # CI script — runs tests automatically on every push
 │
 ├── config/
-│   Centralized configuration
-│   │
-│   └── config.yaml
-│       Single source of truth for file paths, schema, and model settings
+│   └── config.yaml                  # Single source of truth for paths, schema, and model settings
 │
 ├── data/
-│   Dataset storage
-│   │
-│   ├── raw/
-│   │   Fresh, untouched CSV datasets
-│   │
-│   └── processed/
-│       Cleaned, scaled, numeric data ready for training
+│   ├── raw/                         # Fresh, untouched CSV datasets
+│   └── processed/                   # Cleaned, scaled, numeric data ready for training
 │
 ├── src/
-│   Core application code
+│   ├── __init__.py                  # Marks this directory as a Python package
 │   │
-│   ├── __init__.py
-│   │   Marks this directory as a Python package
+│   ├── components/                  # The building blocks of the pipeline
+│   │   ├── __init__.py
+│   │   ├── data_ingestion.py        # Loads raw files and splits data into train/test sets
+│   │   ├── data_validation.py       # Checks data integrity and flags broken/invalid records
+│   │   ├── data_transformation.py   # Imputes missing values, encodes categories, and scales inputs
+│   │   ├── model_trainer.py         # Trains the XGBoost model and logs metrics to MLflow
+│   │   └── model_evaluation.py      # Compares newly trained models against the production baseline
 │   │
-│   ├── components/
-│   │   The building blocks of the pipeline
-│   │   │
-│   │   ├── data_ingestion.py
-│   │   │   Loads raw files and splits data into train/test sets
-│   │   │
-│   │   ├── data_validation.py
-│   │   │   Checks data integrity and flags broken or invalid records
-│   │   │
-│   │   ├── data_transformation.py
-│   │   │   Imputes missing values, encodes categories, and scales inputs
-│   │   │
-│   │   ├── model_trainer.py
-│   │   │   Trains the XGBoost model and logs metrics to MLflow
-│   │   │
-│   │   └── model_evaluation.py
-│   │       Compares newly trained models against the production baseline
+│   ├── pipeline/                    # Pipeline orchestrators
+│   │   ├── __init__.py
+│   │   └── training_pipeline.py     # The conductor — runs all components in order
 │   │
-│   ├── pipeline/
-│   │   │
-│   │   └── training_pipeline.py
-│   │       The conductor — runs all components in order
-│   │
-│   └── api/
-│       │
-│       ├── app.py
-│       │   FastAPI backend that serves real-time predictions
-│       │
-│       └── dashboard.py
-│           Streamlit frontend for interacting with the model
+│   └── api/                         # Serving and UI layer
+│       ├── app.py                   # FastAPI backend that serves real-time predictions
+│       └── dashboard.py             # Streamlit frontend for interacting with the model
 │
-├── tests/
-│   Safety nets
-│   │
-│   ├── conftest.py
-│   │   Test setup and shared path configuration
-│   │
-│   └── test_components.py
-│       Throws bad data at the pipeline to verify it holds up
+├── tests/                           # Safety nets
+│   ├── conftest.py                 # Test setup and shared path configuration
+│   └── test_components.py          # Throws bad data at the pipeline to verify it holds up
 │
-├── Dockerfile
-│   Bundles the application into a container
-│
-├── requirements.txt
-│   Pinned Python dependencies
-│
-└── README.md
+├── Dockerfile                       # Bundles the application into a container
+├── requirements.txt                 # Pinned Python dependencies
+└── README.md                        # Project documentation
 
 
 How to run this locally
