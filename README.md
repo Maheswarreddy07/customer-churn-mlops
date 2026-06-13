@@ -59,40 +59,38 @@ customer-churn-mlops/
 └── README.md                        # Project documentation
 
 
-How to run this locally
+## How to run this locally
 
-1. Boot up the MLflow Tracking Server
-
+### 1. Boot up the MLflow Tracking Server
 Keep this window active to handle metric tracking and the model registry:
 
-bashmlflow server --host 127.0.0.1 --port 5000
+```bash
+mlflow server --host 127.0.0.1 --port 5000
 
 2. Run the training pipeline
+This runs ingestion → validation → transformation → training → evaluation, end to end:
 
-bashpython -m src.pipeline.training_pipeline
-
-This runs ingestion → validation → transformation → training → evaluation, end to end.
+Bash
+python -m src.pipeline.training_pipeline
 
 3. Start the API
-
-bashuvicorn src.api.app:app --reload
+Bash
+uvicorn src.api.app:app --reload
 
 4. Launch the dashboard
-
-bashstreamlit run src/api/dashboard.py
+Bash
+streamlit run src/api/dashboard.py
 
 Or run everything in Docker
-
-bashdocker build -t churn-mlops .
+Bash
+docker build -t churn-mlops .
 docker run -p 8000:8000 churn-mlops
 
-
 Running tests
-
-bashpytest tests/
+Bash
+pytest tests/
 
 Tests run automatically on every push via GitHub Actions (.github/workflows/test_pipeline.yml).
-
 
 Tech stack
 
