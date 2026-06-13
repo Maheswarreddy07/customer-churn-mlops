@@ -15,8 +15,7 @@ Live API — A FastAPI backend that pulls the current "champion" model directly 
 Dashboard — A Streamlit web app where anyone can enter a customer's age, monthly charges, and support ticket count and instantly see a churn risk score with a recommended action.
 
 
-
-Project structure
+## Project structure
 
 customer-churn-mlops/
 │
@@ -51,8 +50,8 @@ customer-churn-mlops/
 │       └── dashboard.py             # Streamlit frontend for interacting with the model
 │
 ├── tests/                           # Safety nets
-│   ├── conftest.py                 # Test setup and shared path configuration
-│   └── test_components.py          # Throws bad data at the pipeline to verify it holds up
+│   ├── conftest.py                  # Test setup and shared path configuration
+│   └── test_components.py           # Throws bad data at the pipeline to verify it holds up
 │
 ├── Dockerfile                       # Bundles the application into a container
 ├── requirements.txt                 # Pinned Python dependencies
