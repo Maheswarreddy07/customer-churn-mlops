@@ -17,6 +17,7 @@ Dashboard — A Streamlit web app where anyone can enter a customer's age, month
 
 ## Project structure
 
+```text
 customer-churn-mlops/
 │
 ├── .github/
