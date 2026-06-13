@@ -1,0 +1,22 @@
+artifacts:
+  raw_data_dir: "data/raw"
+  processed_data_dir: "data/processed"
+  raw_data_file: "data/raw/customer_churn.csv"
+  train_data_file: "data/processed/train.csv"
+  test_data_file: "data/processed/test.csv"
+
+data_validation:
+  expected_columns:
+    - "CustomerID"
+    - "Age"
+    - "SubscriptionPlan"
+    - "MonthlyCharges"
+    - "ContractType"
+    - "SupportTickets"
+    - "Churn"
+  min_age: 18
+  max_age: 100
+
+model_tracking:
+  experiment_name: "Customer_churn_Prediction"
+  mlflow_tracking_uri: "http://127.0.0.1:5000"
