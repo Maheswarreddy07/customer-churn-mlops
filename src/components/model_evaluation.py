@@ -1,66 +1,33 @@
-import yaml
-import pandas as pd
 import mlflow
-import mlflow.xgboost
-from xgboost import XGBClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from mlflow.tracking import MlflowClient
 
-class ModelTrainer:
-    def __init__(self, config_path="config/config.yaml"):
-        with open(config_path, "r") as f:
-            self.config = yaml.safe_load(f)
-            
-        self.train_path = self.config["artifacts"]["train_data_file"]
-        self.test_path = self.config["artifacts"]["test_data_file"]
-        
-        mlflow.set_tracking_uri(self.config["model_tracking"]["mlflow_tracking_uri"])
-        mlflow.set_experiment(self.config["model_tracking"]["experiment_name"])
+class ModelEvaluation:
+    def __init__(self):
+        self.client = MlflowClient()
+        self.model_name = "XGBoost_Churn_Model"
 
-    def initiate_model_training(self):
-        print("🏋️ Starting Model Training...")
+    def evaluate_and_gatekeep(self, current_run_accuracy: float) -> bool:
+        print("\n⚖️ Initiating Model Evaluation Gatekeeper...")
         
-        train_df = pd.read_csv(self.train_path)
-        test_df = pd.read_csv(self.test_path)
-        
-        X_train = train_df.drop(columns=["Churn"])
-        y_train = train_df["Churn"]
-        X_test = test_df.drop(columns=["Churn"])
-        y_test = test_df["Churn"]
-        
-        params = {
-            "n_estimators": 100,
-            "max_depth": 5,
-            "learning_rate": 0.1,
-            "random_state": 42
-        }
-        
-        with mlflow.start_run():
+        try:
+            # Fetch the baseline model using the new UI Aliases API
+            model_version_details = self.client.get_model_version_by_alias(self.model_name, "champion")
             
-            model = XGBClassifier(**params)
-            model.fit(X_train, y_train)
+            # Extract the run metrics of the active champion baseline
+            prod_run_id = model_version_details.run_id
+            prod_run = mlflow.get_run(prod_run_id)
             
-            y_pred = model.predict(X_test)
+            baseline_accuracy = float(prod_run.data.metrics.get("accuracy", 0.0))
+            print(f"📊 Baseline Production ('champion') Accuracy: {baseline_accuracy:.4f}")
+            print(f"📊 Newly Trained Model Accuracy: {current_run_accuracy:.4f}")
             
-            metrics = {
-                "accuracy": accuracy_score(y_test, y_pred),
-                "precision": precision_score(y_test, y_pred),
-                "recall": recall_score(y_test, y_pred),
-                "f1_score": f1_score(y_test, y_pred)
-            }
-            
-            print(f"📊 Model Performance: {metrics}")
-            
-            mlflow.log_params(params)
-            mlflow.log_metrics(metrics)
-            
-            mlflow.xgboost.log_model(
-                xgb_model=model,
-                artifact_path="model",
-                registered_model_name="XGBoost_Churn_Model"
-            )
-            
-            print("🏆 Model successfully tracked and registered in MLflow Registry.")
-
-if __name__ == "__main__":
-    trainer = ModelTrainer()
-    trainer.initiate_model_training()
+            if current_run_accuracy >= baseline_accuracy:
+                print("✅ Success: New model meets or outperforms the production baseline.")
+                return True
+            else:
+                print("❌ Rejected: New model performance is lower than current baseline.")
+                return False
+                
+        except Exception as e:
+            print("ℹ️ No 'champion' baseline model alias active in registry yet. Automatically approving new model run.")
+            return True
